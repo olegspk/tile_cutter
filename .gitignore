@@ -1,0 +1,41 @@
+# Local virtualenv directories.
+venv*
+
+# Compiled, optimized or cached files.
+.cache/
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+
+# Mystic etc.
+/etc/
+
+# IntelliJ IDEA.
+/.idea/
+/out/
+
+# Mac OS useless files.
+.DS_Store
+
+# Windows useless files.
+Thumbs.db
+desktop.ini
+
+# Config files.
+server_conf.py
+.env
+docker-compose.yml
+
+# Other dirs.
+/logs/
+/download/
+/example/
+
+# Other files.
+*.csv
+*.xls
+*.xlsx
+*.log
+*.ipynb
+.ipynb_checkpoints
