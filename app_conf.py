@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 dir_to_save = 'out'
+map_url = 'http://your_tile_server.com:8080/styles/osm-bright'
 
+# https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat._3
 zoom_px_dict = {
     0: 156543.03,
     1: 78271.52,
@@ -24,5 +26,3 @@ zoom_px_dict = {
     17: 1.1943,
     18: 0.5972
 }
-
-map_url = 'http://your_tile_server.com:8080/styles/osm-bright'
