@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-dir_to_save = 'out'
-map_url = 'http://your_tile_server.com:8080/styles/osm-bright'
-
 # https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat._3
 zoom_px_dict = {
     0: 156543.03,
