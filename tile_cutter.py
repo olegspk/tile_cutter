@@ -11,7 +11,7 @@ import geopy.distance
 import pandas as pd
 from PIL import Image
 
-from app_conf import zoom_px_dict, dir_to_save, map_url
+from app_conf import zoom_px_dict
 
 
 def deg2num(lat_deg, lon_deg, zoom):
@@ -93,7 +93,7 @@ def calc_number_tiles(size_fragment):
         return 3 + 2 * int(size_fragment / max_crop_size)
 
 
-def get_image_cluster(lat_deg, lon_deg, zoom, size_fragment):
+def get_image_cluster(map_url, lat_deg, lon_deg, zoom, size_fragment):
     smurl = r'{0}/{1}/{2}/{3}.png'
     xmin, ymin = deg2num(lat_deg, lon_deg, zoom)
     n_tiles = calc_number_tiles(size_fragment)
@@ -125,17 +125,25 @@ def crop_img(im, shift_x, shift_y, size):
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-url', help='URL your tile server.')
     parser.add_argument('-csv', help='CSV filename with id, lat, lon.')
-    parser.add_argument('-size', type=int,
-                        help='Fragment image size value.')
+    parser.add_argument('-sep', help='Your CSV separator.')
+    parser.add_argument('-out', help='Dir to out created images.')
+    parser.add_argument('-size', type=int, help='Fragment image size value.')
     parser.add_argument('-zoom', type=int, help='Zoom value.')
     args = parser.parse_args()
     missed_valies = []
     if args.csv and args.size and args.zoom:
-        return args.csv, args.size, args.zoom
+        return args.url, args.csv, args.sep, args.out, args.size, args.zoom
     else:
         if not args.csv:
+            missed_valies.append('url')
+        if not args.csv:
             missed_valies.append('csv')
+        if not args.csv:
+            missed_valies.append('sep')
+        if not args.csv:
+            missed_valies.append('out')
         if not args.size:
             missed_valies.append('size')
         if not args.zoom:
@@ -145,10 +153,10 @@ def parse_args():
 
 
 def main():
-    if not os.path.exists(dir_to_save):
-        os.makedirs(dir_to_save)
-    csv_filename, size_fragment, zoom = parse_args()
-    df = pd.read_csv(csv_filename, sep=';')
+    map_url, csv_filename, sep, out_dir, size_fragment, zoom = parse_args()
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    df = pd.read_csv(csv_filename, sep=sep)
     values = df.values
     length = len(values)
     cnt = 1
@@ -156,10 +164,10 @@ def main():
         id_, lat, lon = v
         id_ = str(id_)
         shift_x, shift_y = calc_shift_dists_in_px((lat, lon), zoom)
-        ic = get_image_cluster(lat, lon, zoom, size_fragment)
+        ic = get_image_cluster(map_url, lat, lon, zoom, size_fragment)
         ci = crop_img(ic, shift_x, shift_y, size_fragment)
         fni = f'{id_}.jpg'
-        ci.save(f'{dir_to_save}/{fni}', 'JPEG', quality=80, optimize=True,
+        ci.save(f'{out_dir}/{fni}', 'JPEG', quality=80, optimize=True,
                 progressive=True)
         print(f'Created image: {fni} for id: {id_}, '
               f'lat: {lat}, lon: {lon}, # {cnt} from {length}')
