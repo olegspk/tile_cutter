@@ -156,7 +156,7 @@ def main():
     map_url, csv_filename, sep, out_dir, size_fragment, zoom = parse_args()
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    df = pd.read_csv(csv_filename, sep=sep)
+    df = pd.read_csv(csv_filename, header=None, sep=sep)
     values = df.values
     length = len(values)
     cnt = 1
