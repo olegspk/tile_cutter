@@ -4,6 +4,7 @@
 import argparse
 import math
 import os
+import shutil
 import urllib
 from io import BytesIO
 from pathlib import Path
@@ -188,7 +189,7 @@ def main():
         print(f'Created image: {fni} for id: {id_}, '
               f'lat: {lat}, lon: {lon}, # {cnt} from {length}')
         cnt += 1
-    os.remove(cache_dir)
+    shutil.rmtree(cache_dir)
 
 
 if __name__ == '__main__':
