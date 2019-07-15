@@ -4,8 +4,10 @@
 import argparse
 import math
 import os
+import shutil
 import urllib
 from io import BytesIO
+from pathlib import Path
 
 import geopy.distance
 import pandas as pd
@@ -93,7 +95,8 @@ def calc_number_tiles(size_fragment):
         return 3 + 2 * int(size_fragment / max_crop_size)
 
 
-def get_image_cluster(map_url, lat_deg, lon_deg, zoom, size_fragment):
+def get_image_cluster(
+        map_url, lat_deg, lon_deg, zoom, size_fragment, cache_dir):
     smurl = r'{0}/{1}/{2}/{3}.png'
     xmin, ymin = deg2num(lat_deg, lon_deg, zoom)
     n_tiles = calc_number_tiles(size_fragment)
@@ -102,14 +105,24 @@ def get_image_cluster(map_url, lat_deg, lon_deg, zoom, size_fragment):
     for xtile in range(xmin - shift, xmin + shift + 1):
         for ytile in range(ymin - shift, ymin + shift + 1):
             try:
-                imgurl = smurl.format(map_url, zoom, xtile, ytile)
-                imgstr = urllib.request.urlopen(imgurl).read()
-                tile = Image.open(BytesIO(imgstr))
+                tmp_name = f'{zoom}_{xtile}_{ytile}.jpg'
+                pret_path = cache_dir / tmp_name
+                if pret_path.exists():
+                    with pret_path.open('rb') as tmp_img:
+                        img = BytesIO(tmp_img.read())
+                else:
+                    imgurl = smurl.format(map_url, zoom, xtile, ytile)
+                    imgstr = urllib.request.urlopen(imgurl).read()
+                    with pret_path.open('wb') as tmp_img:
+                        tmp_img.write(imgstr)
+                    img = BytesIO(imgstr)
+                tile = Image.open(img)
                 cluster.paste(tile, box=(
                     (xtile - xmin + shift) * 256,
                     (ytile - ymin + shift) * 256))
             except:
                 print('Could not download image.')
+                raise
     return cluster
 
 
@@ -156,7 +169,10 @@ def main():
     map_url, csv_filename, sep, out_dir, size_fragment, zoom = parse_args()
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    df = pd.read_csv(csv_filename, header=None, sep=sep)
+    cache_dir = Path(f'{out_dir}_cache')
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    df = pd.read_csv(csv_filename, sep=sep)
     values = df.values
     length = len(values)
     cnt = 1
@@ -164,14 +180,16 @@ def main():
         id_, lat, lon = v
         id_ = str(id_)
         shift_x, shift_y = calc_shift_dists_in_px((lat, lon), zoom)
-        ic = get_image_cluster(map_url, lat, lon, zoom, size_fragment)
+        ic = get_image_cluster(
+            map_url, lat, lon, zoom, size_fragment, cache_dir)
         ci = crop_img(ic, shift_x, shift_y, size_fragment)
         fni = f'{id_}.jpg'
-        ci.save(f'{out_dir}/{fni}', 'JPEG', quality=80, optimize=True,
+        ci.save(f'{out_dir}/{fni}', 'JPEG', quality=100, optimize=True,
                 progressive=True)
         print(f'Created image: {fni} for id: {id_}, '
               f'lat: {lat}, lon: {lon}, # {cnt} from {length}')
         cnt += 1
+    shutil.rmtree(cache_dir)
 
 
 if __name__ == '__main__':
