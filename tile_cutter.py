@@ -145,23 +145,23 @@ def parse_args():
     parser.add_argument('-size', type=int, help='Fragment image size value.')
     parser.add_argument('-zoom', type=int, help='Zoom value.')
     args = parser.parse_args()
-    missed_valies = []
+    missed_values = []
     if args.csv and args.size and args.zoom:
         return args.url, args.csv, args.sep, args.out, args.size, args.zoom
     else:
         if not args.csv:
-            missed_valies.append('url')
+            missed_values.append('url')
         if not args.csv:
-            missed_valies.append('csv')
+            missed_values.append('csv')
         if not args.csv:
-            missed_valies.append('sep')
+            missed_values.append('sep')
         if not args.csv:
-            missed_valies.append('out')
+            missed_values.append('out')
         if not args.size:
-            missed_valies.append('size')
+            missed_values.append('size')
         if not args.zoom:
-            missed_valies.append('zoom')
-        print(f'Missed arguments: {", ".join(missed_valies)}')
+            missed_values.append('zoom')
+        print(f'Missed arguments: {", ".join(missed_values)}')
         os.sys.exit()
 
 
@@ -177,7 +177,7 @@ def main():
     length = len(values)
     cnt = 1
     for v in values:
-        id_, lat, lon = v
+        id_, lat, lon = v[:3]
         id_ = str(id_)
         shift_x, shift_y = calc_shift_dists_in_px((lat, lon), zoom)
         ic = get_image_cluster(
