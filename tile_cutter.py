@@ -177,7 +177,7 @@ def main():
     length = len(values)
     cnt = 1
     for v in values:
-        id_, lat, lon = v[:3]
+        id_, lat, lon = v
         id_ = str(id_)
         shift_x, shift_y = calc_shift_dists_in_px((lat, lon), zoom)
         ic = get_image_cluster(
